@@ -178,6 +178,12 @@ def calculate_stats(prices, benchmark_col='Nifty 50'):
 df_price = load_data()
 rs_ratio, rs_momentum = load_rrg_data()
 
+# Check if data loaded successfully to prevent crashes
+if df_price.empty:
+    st.error("⚠️ **Critical Error: Data Missing**")
+    st.info("The `data/` folder is missing or empty. Please upload the `data` folder to your GitHub repository.")
+    st.stop()
+
 # --- SIDEBAR ---
 with st.sidebar:
     st.title("⚙️ Controls")
