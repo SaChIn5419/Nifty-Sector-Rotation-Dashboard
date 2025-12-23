@@ -1,0 +1,42 @@
+
+--- Nifty Bank ---
+Total days: 4496
+Zero returns: 291
+NaN returns: 1
+Unique non-zero returns count: 4204
+Top 5 returns:
+Nifty Bank
+0.000000    291
+0.023568      1
+0.017996      1
+0.028733      1
+0.015070      1
+Name: count, dtype: int64
+
+--- Nifty IT ---
+Total days: 4496
+Zero returns: 307
+NaN returns: 1
+Unique non-zero returns count: 4188
+Top 5 returns:
+Nifty IT
+0.000000    307
+0.000700      1
+0.022180      1
+0.000953      1
+0.023794      1
+Name: count, dtype: int64
+
+--- Nifty 50 ---
+Total days: 4496
+Zero returns: 20
+NaN returns: 1
+Unique non-zero returns count: 4475
+Top 5 returns:
+Nifty 50
+ 0.000000    20
+-0.006760     1
+ 0.004657     1
+ 0.009213     1
+-0.002710     1
+Name: count, dtype: int64

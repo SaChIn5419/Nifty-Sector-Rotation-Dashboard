@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Data & Results (GitHub usually has 100MB limit, better to let users fetch data)
+# data/combined_sectoral_data.csv
+# Put data in if you want it included, but ignore temp files
+analysis_results/monthly_heatmaps/*.csv
+
+# Visuals
+visuals/*.png
+
+# System
+.DS_Store
+Thumbs.db
+.streamlit/
