@@ -88,8 +88,13 @@ st.markdown("""
 @st.cache_data
 def load_data():
     """Loads and cleans price data with robust glitch removal."""
+    # Check for file in data folder or root
+    file_path = 'data/combined_sectoral_data.csv'
+    if not os.path.exists(file_path):
+        file_path = 'combined_sectoral_data.csv'
+        
     try:
-        df = pd.read_csv('data/combined_sectoral_data.csv', index_col=0, parse_dates=True)
+        df = pd.read_csv(file_path, index_col=0, parse_dates=True)
         
         # Robust Data Cleansing (Ratio-to-Benchmark)
         benchmark_col = 'Nifty 50'
@@ -108,20 +113,25 @@ def load_data():
         df = df.interpolate(method='linear', limit_area='inside').ffill().bfill()
         return df
     except FileNotFoundError:
-        st.error("Data file 'data/combined_sectoral_data.csv' not found. Please run analysis.py.")
         return pd.DataFrame()
 
 @st.cache_data
 def load_rrg_data():
     """Loads pre-calculated RRG data."""
+    # Check for files in analysis_results folder or root
+    ratio_path = 'analysis_results/rs_ratio.csv'
+    mom_path = 'analysis_results/rs_momentum.csv'
+    
+    if not os.path.exists(ratio_path): ratio_path = 'rs_ratio.csv'
+    if not os.path.exists(mom_path): mom_path = 'rs_momentum.csv'
+
     try:
-        rs_ratio = pd.read_csv('analysis_results/rs_ratio.csv', index_col=0, parse_dates=True)
-        rs_momentum = pd.read_csv('analysis_results/rs_momentum.csv', index_col=0, parse_dates=True)
+        rs_ratio = pd.read_csv(ratio_path, index_col=0, parse_dates=True)
+        rs_momentum = pd.read_csv(mom_path, index_col=0, parse_dates=True)
         rs_ratio = rs_ratio.interpolate(method='linear').ffill().bfill()
         rs_momentum = rs_momentum.interpolate(method='linear').ffill().bfill()
         return rs_ratio, rs_momentum
     except FileNotFoundError:
-        st.error("RRG analysis files not found in 'analysis_results/'. Please run analysis.py.")
         return pd.DataFrame(), pd.DataFrame()
 
 def calculate_stats(prices, benchmark_col='Nifty 50'):
@@ -384,14 +394,30 @@ with tab4:
         seat_sec = st.selectbox("Select Sector", options=available_sectors)
     
     with col2:
-        m_file = f"analysis_results/monthly_heatmaps/{seat_sec.lower().replace(' ', '_')}.csv"
-        if os.path.exists(m_file):
+        # Try multiple paths for the seasonality file
+        filename = f"{seat_sec.lower().replace(' ', '_')}.csv"
+        possible_paths = [
+            f"analysis_results/monthly_heatmaps/{filename}",
+            f"monthly_heatmaps/{filename}",
+            filename
+        ]
+        
+        m_file = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                m_file = path
+                break
+                
+        if m_file:
             m_df = pd.read_csv(m_file, index_col=0)
             m_df.columns = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             
             # Robust scaling
-            vals = m_df.values.flatten()
-            vmin, vmax = np.nanpercentile(vals, [5, 95])
+            try:
+                vals = m_df.values.flatten()
+                vmin, vmax = np.nanpercentile(vals, [5, 95])
+            except:
+                vmin, vmax = None, None
             
             fig_hm = px.imshow(
                 m_df, 
@@ -413,8 +439,18 @@ with tab4:
     
     st.markdown("---")
     st.subheader("📆 Day-of-Week Effect")
-    if os.path.exists('analysis_results/weekday_analysis.csv'):
-        w_df = pd.read_csv('analysis_results/weekday_analysis.csv', index_col=0)
+    
+    # Check for weekday file in multiple locations
+    w_filename = 'weekday_analysis.csv'
+    w_paths = ['analysis_results/weekday_analysis.csv', w_filename]
+    w_file = None
+    for path in w_paths:
+        if os.path.exists(path):
+            w_file = path
+            break
+            
+    if w_file:
+        w_df = pd.read_csv(w_file, index_col=0)
         fig_wk = px.imshow(
             w_df.T, 
             text_auto=".2f", 
